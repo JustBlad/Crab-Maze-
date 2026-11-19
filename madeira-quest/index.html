@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#FF7A1A" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="description" content="Madeira Quest – entdecke Funchal, sammle Orte und teile Fotos mit anderen Erasmus-Studis." />
+  <meta name="description" content="Madeira Quest – discover Funchal, collect places and share photos with other Erasmus students." />
   <title>Madeira Quest</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -24,20 +24,20 @@
       <div class="ob-inner">
         <div class="ob-logo" id="obLogo"></div>
         <h1 class="ob-title">Madeira <span>Quest</span></h1>
-        <p class="ob-sub">Entdecke Funchal mit den anderen Erasmus‑Studis. Besuche Orte, lade ein Foto hoch und schalte die Galerie der anderen frei.</p>
+        <p class="ob-sub">Explore Funchal with your Erasmus group. Visit places, upload a photo and unlock everyone else's pictures.</p>
 
         <ul class="ob-points">
-          <li><span class="ob-ic">📍</span><div><b>Orte entdecken</b><small>Cafés, Strände &amp; Bars in Funchal</small></div></li>
-          <li><span class="ob-ic">📸</span><div><b>Foto hochladen</b><small>…und die geteilte Galerie freischalten</small></div></li>
-          <li><span class="ob-ic">🏆</span><div><b>Punkte sammeln</b><small>Wer besucht die meisten Orte?</small></div></li>
+          <li><span class="ob-ic">📍</span><div><b>Discover places</b><small>Cafés, beaches &amp; bars in Funchal</small></div></li>
+          <li><span class="ob-ic">📸</span><div><b>Upload a photo</b><small>…and unlock the shared gallery</small></div></li>
+          <li><span class="ob-ic">🏆</span><div><b>Collect points</b><small>Who visits the most places?</small></div></li>
         </ul>
 
         <label class="field">
-          <span>Wie heißt du?</span>
-          <input id="obName" type="text" maxlength="20" placeholder="z. B. Lena" autocomplete="given-name" />
+          <span>What's your name?</span>
+          <input id="obName" type="text" maxlength="20" placeholder="e.g. Lena" autocomplete="given-name" />
         </label>
-        <button class="btn btn-primary btn-block" id="obStart">Los geht's</button>
-        <p class="ob-foot">Wir fragen gleich nach deinem Standort, damit du Orte in deiner Nähe siehst. Er bleibt auf deinem Handy.</p>
+        <button class="btn btn-primary btn-block" id="obStart">Let's go</button>
+        <p class="ob-foot">Next we'll ask for your location so you can see places near you. It stays on your phone.</p>
       </div>
     </section>
 
@@ -49,7 +49,7 @@
       </header>
       <div class="chips" id="chips"></div>
       <div id="map"></div>
-      <button class="fab-locate" id="locateBtn" aria-label="Mein Standort">
+      <button class="fab-locate" id="locateBtn" aria-label="My location">
         <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       </button>
       <div class="sheet" id="sheet" aria-hidden="true"></div>
@@ -68,7 +68,7 @@
     <nav class="tabbar" id="tabbar" hidden>
       <a href="#/map" data-tab="map">
         <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="2"/></svg>
-        <span>Karte</span>
+        <span>Map</span>
       </a>
       <a href="#/quests" data-tab="quests">
         <svg viewBox="0 0 24 24"><path d="M5 4h14v5a7 7 0 0 1-14 0V4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 16v4M8 20h8M5 6H2v2a3 3 0 0 0 3 3M19 6h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -76,7 +76,7 @@
       </a>
       <a href="#/profile" data-tab="profile">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <span>Profil</span>
+        <span>Profile</span>
       </a>
     </nav>
 
@@ -88,6 +88,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="data.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

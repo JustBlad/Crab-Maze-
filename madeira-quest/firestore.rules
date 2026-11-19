@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// Madeira Quest – Firestore security rules
+// Everyone who opened the app (anonymous sign-in) can READ everything,
+// but can only WRITE their own documents.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function ownsNew(docId) {
+      return signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && docId == request.resource.data.placeId + '_' + request.auth.uid;
+    }
+    function ownsOld() { return signedIn() && resource.data.uid == request.auth.uid; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid
+                   && request.resource.data.name is string
+                   && request.resource.data.name.size() <= 20
+                   && request.resource.data.points is int;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /visits/{docId} {
+      allow read: if signedIn();
+      allow create, update: if ownsNew(docId);
+      allow delete: if ownsOld();
+    }
+
+    match /ratings/{docId} {
+      allow read: if signedIn();
+      allow create, update: if ownsNew(docId)
+                            && request.resource.data.value is int
+                            && request.resource.data.value >= 1
+                            && request.resource.data.value <= 5
+                            // honest ratings: only after you visited (uploaded a photo)
+                            && exists(/databases/$(database)/documents/visits/$(docId));
+      allow delete: if ownsOld();
+    }
+
+    match /photos/{docId} {
+      allow read: if signedIn();
+      allow create, update: if ownsNew(docId)
+                            && request.resource.data.photo is string
+                            && request.resource.data.photo.size() < 900000;
+      allow delete: if ownsOld();
+    }
+  }
+}
