@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FF7A1A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="description" content="Madeira Quest – entdecke Funchal, sammle Orte und teile Fotos mit anderen Erasmus-Studis." />
+  <title>Madeira Quest</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ONBOARDING -->
+    <section id="onboarding" class="screen onboarding" hidden>
+      <div class="ob-inner">
+        <div class="ob-logo" id="obLogo"></div>
+        <h1 class="ob-title">Madeira <span>Quest</span></h1>
+        <p class="ob-sub">Entdecke Funchal mit den anderen Erasmus‑Studis. Besuche Orte, lade ein Foto hoch und schalte die Galerie der anderen frei.</p>
+
+        <ul class="ob-points">
+          <li><span class="ob-ic">📍</span><div><b>Orte entdecken</b><small>Cafés, Strände &amp; Bars in Funchal</small></div></li>
+          <li><span class="ob-ic">📸</span><div><b>Foto hochladen</b><small>…und die geteilte Galerie freischalten</small></div></li>
+          <li><span class="ob-ic">🏆</span><div><b>Punkte sammeln</b><small>Wer besucht die meisten Orte?</small></div></li>
+        </ul>
+
+        <label class="field">
+          <span>Wie heißt du?</span>
+          <input id="obName" type="text" maxlength="20" placeholder="z. B. Lena" autocomplete="given-name" />
+        </label>
+        <button class="btn btn-primary btn-block" id="obStart">Los geht's</button>
+        <p class="ob-foot">Wir fragen gleich nach deinem Standort, damit du Orte in deiner Nähe siehst. Er bleibt auf deinem Handy.</p>
+      </div>
+    </section>
+
+    <!-- MAP VIEW -->
+    <section id="view-map" class="screen view" hidden>
+      <header class="topbar topbar-float">
+        <div class="brand" id="brandSmall"></div>
+        <div class="pill-score" id="scorePill">⭐ 0</div>
+      </header>
+      <div class="chips" id="chips"></div>
+      <div id="map"></div>
+      <button class="fab-locate" id="locateBtn" aria-label="Mein Standort">
+        <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <div class="sheet" id="sheet" aria-hidden="true"></div>
+    </section>
+
+    <!-- PLACE VIEW -->
+    <section id="view-place" class="screen view scroll" hidden></section>
+
+    <!-- QUESTS VIEW -->
+    <section id="view-quests" class="screen view scroll" hidden></section>
+
+    <!-- PROFILE / RANKING -->
+    <section id="view-profile" class="screen view scroll" hidden></section>
+
+    <!-- BOTTOM NAV -->
+    <nav class="tabbar" id="tabbar" hidden>
+      <a href="#/map" data-tab="map">
+        <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Karte</span>
+      </a>
+      <a href="#/quests" data-tab="quests">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14v5a7 7 0 0 1-14 0V4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 16v4M8 20h8M5 6H2v2a3 3 0 0 0 3 3M19 6h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Quests</span>
+      </a>
+      <a href="#/profile" data-tab="profile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Profil</span>
+      </a>
+    </nav>
+
+    <!-- hidden file input for uploads -->
+    <input type="file" id="fileInput" accept="image/*" capture="environment" hidden />
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="modal" id="modal" hidden></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

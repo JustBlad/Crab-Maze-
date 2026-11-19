@@ -1,0 +1,9 @@
+{
+  "name": "Madeira Quest",
+  "short_name": "Madeira Quest",
+  "start_url": "./index.html#/map",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF7A1A",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
