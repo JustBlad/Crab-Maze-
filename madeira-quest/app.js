@@ -361,12 +361,14 @@
     } else { meMarker.setLatLng(ll); accCircle.setLatLng(ll).setRadius(userPos.acc); }
     $("#locateBtn").classList.add("active");
   }
+  // Always fly to where the user really is – in Funchal or anywhere else.
   function centerOnMe() {
     if (!userPos || !map) return;
-    const funchal = L.latLngBounds([32.60, -17.05], [32.72, -16.80]);
-    if (funchal.contains([userPos.lat, userPos.lng])) map.flyTo([userPos.lat, userPos.lng], 16, { duration: 0.8 });
-    else { toast("You're not in Funchal right now – showing the city anyway 🙂"); map.flyTo(CONFIG.center, CONFIG.zoom); }
+    map.flyTo([userPos.lat, userPos.lng], 16, { duration: 0.9 });
+    const km = haversine(userPos, { lat: CONFIG.center[0], lng: CONFIG.center[1] }) / 1000;
+    if (km > 15) toast(`You're ${km < 100 ? km.toFixed(0) : Math.round(km).toLocaleString("en")} km from Funchal – tap 🏝️ to jump back`);
   }
+  function goFunchal() { map.flyTo(CONFIG.center, CONFIG.zoom, { duration: 0.9 }); }
   function refreshDistances() {
     if (selectedId) renderSheet(selectedId, true);
     const h = location.hash;
@@ -392,10 +394,7 @@
   // ---------- Map ----------
   function initMap() {
     map = L.map("map", { zoomControl: false }).setView(CONFIG.center, CONFIG.zoom);
-    L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 19, subdomains: "abcd",
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    }).addTo(map);
+    setBaseLayer(state.mapStyle || "sat");
     map.on("click", closeSheet);
     PLACES.forEach((p) => {
       markers[p.id] = L.marker([p.lat, p.lng], { icon: markerIcon(p) }).addTo(map)
@@ -404,6 +403,47 @@
     renderChips();
     applyFilter();
     $("#locateBtn").onclick = () => { if (userPos) centerOnMe(); else startGeo(true); };
+    $("#funchalBtn").onclick = goFunchal;
+    $("#layerBtn").onclick = () => setBaseLayer(state.mapStyle === "map" ? "sat" : "map");
+  }
+
+  // ---------- Base layers: satellite (default) or street map ----------
+  const BASE = {
+    sat: () => [
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19, maxNativeZoom: 18,
+        attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics",
+      }),
+      // street & place names on top of the satellite photo
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 18, opacity: 0.7 }),
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 18 }),
+    ],
+    map: () => [
+      L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19, subdomains: "abcd",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      }),
+    ],
+    osm: () => [
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }),
+    ],
+  };
+  let baseLayers = [];
+  function setBaseLayer(style) {
+    baseLayers.forEach((l) => map.removeLayer(l));
+    baseLayers = BASE[style]();
+    let errors = 0;
+    baseLayers[0].on("tileerror", () => {
+      // provider down/blocked → fall back to the next one
+      if (++errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBaseLayer(style === "sat" ? "map" : "osm"); }
+    });
+    baseLayers.forEach((l) => l.addTo(map).bringToBack());
+    baseLayers[0].bringToBack();
+    state.mapStyle = style === "osm" ? "map" : style; save();
+    $("#view-map").classList.toggle("sat", style === "sat");
+    // button shows what you switch TO
+    $("#layerIc").textContent = style === "sat" ? "🗺️" : "🛰️";
+    $("#layerTxt").textContent = style === "sat" ? "Map" : "Satellite";
   }
   function markerIcon(p) {
     const c = CATEGORIES[p.cat], { avg } = avgRating(p.id);
@@ -797,6 +837,7 @@
     $("#onboarding").hidden = true;
     $("#tabbar").hidden = false;
     $("#brandSmall").innerHTML = `${LOGO}<div>Madeira <span>Quest</span></div>`;
+    show("view-map"); // map container must be visible before Leaflet measures it
     if (!map) initMap();
     updateScore();
     route();
