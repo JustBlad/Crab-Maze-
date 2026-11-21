@@ -18,7 +18,7 @@ const CONFIG = {
   demoCommunity: true,
   // Optional: free key from https://cloud.maptiler.com (no credit card) for the
   // sharpest, most colourful satellite map. Empty = free Esri imagery.
-  maptilerKey: "",
+  maptilerKey: "iATCxHYYgZaPl2865zvK",
 };
 
 const CATEGORIES = {

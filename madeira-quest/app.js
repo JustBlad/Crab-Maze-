@@ -409,7 +409,7 @@
 
   // ---------- Base layers: satellite (default) or street map ----------
   const BASE = {
-    sat: () => CONFIG.maptilerKey
+    sat: () => CONFIG.maptilerKey && !maptilerFailed
       ? [ // best quality (Google-like hybrid): needs a free MapTiler key in data.js
           L.tileLayer(`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}{r}.jpg?key=${CONFIG.maptilerKey}`, {
             maxZoom: 20, attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; OSM contributors',
@@ -435,14 +435,15 @@
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }),
     ],
   };
-  let baseLayers = [];
+  let baseLayers = [], maptilerFailed = false;
   function setBaseLayer(style) {
     baseLayers.forEach((l) => map.removeLayer(l));
     baseLayers = BASE[style]();
     let errors = 0;
     baseLayers[0].on("tileerror", () => {
       // provider down/blocked → fall back to the next one
-      if (++errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBaseLayer(style === "sat" ? "map" : "osm"); }
+      if (++errors === 6 && style === "sat" && CONFIG.maptilerKey && !maptilerFailed) { maptilerFailed = true; console.warn("MapTiler key failed – using Esri imagery"); setBaseLayer("sat"); return; }
+      if (errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBaseLayer(style === "sat" ? "map" : "osm"); }
     });
     baseLayers.forEach((l) => l.addTo(map).bringToBack());
     baseLayers[0].bringToBack();
