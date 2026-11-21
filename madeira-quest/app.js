@@ -409,15 +409,22 @@
 
   // ---------- Base layers: satellite (default) or street map ----------
   const BASE = {
-    sat: () => [
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19, maxNativeZoom: 18,
-        attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics",
-      }),
-      // street & place names on top of the satellite photo
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 18, opacity: 0.7 }),
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, maxNativeZoom: 18 }),
-    ],
+    sat: () => CONFIG.maptilerKey
+      ? [ // best quality (Google-like hybrid): needs a free MapTiler key in data.js
+          L.tileLayer(`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}{r}.jpg?key=${CONFIG.maptilerKey}`, {
+            maxZoom: 20, attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; OSM contributors',
+          }),
+        ]
+      : [
+          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            maxZoom: 20, maxNativeZoom: 19, className: "sat-imagery",
+            attribution: "Imagery &copy; Esri, Maxar &middot; Labels &copy; CARTO, OSM",
+          }),
+          // clean, modern white street & place labels on top of the photo
+          L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}{r}.png", {
+            maxZoom: 20, subdomains: "abcd", className: "sat-labels",
+          }),
+        ],
     map: () => [
       L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         maxZoom: 19, subdomains: "abcd",
@@ -450,7 +457,7 @@
     const cls = ["mq-marker", isVisited(p.id) && "visited", !isUnlocked(p) && "locked", selectedId === p.id && "selected"].filter(Boolean).join(" ");
     const label = !isUnlocked(p) ? "🔒" : avg ? `★ ${avg.toFixed(1)}` : "new";
     return L.divIcon({
-      className: "", iconSize: [44, 54], iconAnchor: [22, 50],
+      className: "", iconSize: [44, 46], iconAnchor: [22, 44],
       html: `<div class="${cls}" style="--c:${c.color}"><div class="mq-pin"></div><div class="mq-pin-ic">${c.emoji}</div><div class="mq-rating">${label}</div></div>`,
     });
   }

@@ -16,6 +16,9 @@ const CONFIG = {
   // Example students & photos for presentations.
   // Only used when NO Firebase config is set in firebase-config.js.
   demoCommunity: true,
+  // Optional: free key from https://cloud.maptiler.com (no credit card) for the
+  // sharpest, most colourful satellite map. Empty = free Esri imagery.
+  maptilerKey: "",
 };
 
 const CATEGORIES = {
