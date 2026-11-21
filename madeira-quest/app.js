@@ -28,8 +28,7 @@
   let state = load();
   let userPos = null;      // { lat, lng, acc }
   let geoWatchId = null;
-  let map, meMarker, accCircle;
-  const markers = {};
+  let mapInited = false;
   let selectedId = null;
   let pendingUpload = null;
   let lastRoute = null, prevRoute = null;
@@ -355,7 +354,7 @@
   function onCommunityChange() {
     clearTimeout(changeTimer);
     changeTimer = setTimeout(() => {
-      if (map) refreshMarkers();
+      refreshMarkers();
       if (selectedId) renderSheet(selectedId, true);
       if (modalOpen() || !state.user) return; // don't disturb the user mid-action
       const [, page, arg] = (location.hash || "#/map").split("/");
@@ -391,22 +390,18 @@
     );
   }
   function updateMe() {
-    if (!map || !userPos) return;
-    const ll = [userPos.lat, userPos.lng];
-    if (!meMarker) {
-      meMarker = L.marker(ll, { icon: L.divIcon({ className: "", html: '<div class="mq-me"></div>', iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000, interactive: false }).addTo(map);
-      accCircle = L.circle(ll, { radius: userPos.acc, color: "#2F80ED", weight: 1, fillOpacity: 0.08, interactive: false }).addTo(map);
-    } else { meMarker.setLatLng(ll); accCircle.setLatLng(ll).setRadius(userPos.acc); }
+    if (!mapApi || !userPos) return;
+    mapApi.setMe(userPos.lat, userPos.lng, userPos.acc);
     $("#locateBtn").classList.add("active");
   }
   // Always fly to where the user really is – in Funchal or anywhere else.
   function centerOnMe() {
-    if (!userPos || !map) return;
-    map.flyTo([userPos.lat, userPos.lng], 16, { duration: 0.9 });
+    if (!userPos || !mapApi) return;
+    mapApi.flyTo(userPos.lat, userPos.lng, 16);
     const km = haversine(userPos, { lat: CONFIG.center[0], lng: CONFIG.center[1] }) / 1000;
     if (km > 15) toast(`You're ${km < 100 ? km.toFixed(0) : Math.round(km).toLocaleString("en")} km from Funchal – tap “Funchal” to jump back`);
   }
-  function goFunchal() { map.flyTo(CONFIG.center, CONFIG.zoom, { duration: 0.9 }); }
+  function goFunchal() { mapApi && mapApi.flyTo(CONFIG.center[0], CONFIG.center[1], CONFIG.zoom); }
   function refreshDistances() {
     if (selectedId) renderSheet(selectedId, true);
     const h = location.hash;
@@ -429,78 +424,148 @@
     }
   }
 
-  // ---------- Map ----------
-  function initMap() {
-    map = L.map("map", { zoomControl: false }).setView(CONFIG.center, CONFIG.zoom);
-    setBaseLayer(state.mapStyle || "sat");
-    map.on("click", closeSheet);
-    PLACES.forEach((p) => {
-      markers[p.id] = L.marker([p.lat, p.lng], { icon: markerIcon(p) }).addTo(map)
-        .on("click", (e) => { L.DomEvent.stopPropagation(e); selectPlace(p.id); });
-    });
-    renderChips();
-    applyFilter();
-    $("#locateBtn").onclick = () => { if (userPos) centerOnMe(); else startGeo(true); };
-    $("#funchalBtn").onclick = goFunchal;
-    $("#layerBtn").onclick = () => setBaseLayer(state.mapStyle === "map" ? "sat" : "map");
-  }
+  // =========================================================
+  //  MAP – Google Maps (if CONFIG.googleMapsKey) or Leaflet fallback.
+  //  The rest of the app only talks to `mapApi`.
+  // =========================================================
+  let mapApi = null;
 
-  // ---------- Base layers: satellite (default) or street map ----------
-  const BASE = {
-    sat: () => CONFIG.maptilerKey && !maptilerFailed
-      ? [ // best quality (Google-like hybrid): needs a free MapTiler key in data.js
-          L.tileLayer(`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}{r}.jpg?key=${CONFIG.maptilerKey}`, {
-            maxZoom: 20, attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; OSM contributors',
-          }),
-        ]
-      : [
-          L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-            maxZoom: 20, maxNativeZoom: 19, className: "sat-imagery",
-            attribution: "Imagery &copy; Esri, Maxar &middot; Labels &copy; CARTO, OSM",
-          }),
-          // clean, modern white street & place labels on top of the photo
-          L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}{r}.png", {
-            maxZoom: 20, subdomains: "abcd", className: "sat-labels",
-          }),
-        ],
-    map: () => [
-      L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19, subdomains: "abcd",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      }),
-    ],
-    osm: () => [
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }),
-    ],
-  };
-  let baseLayers = [], maptilerFailed = false;
-  function setBaseLayer(style) {
-    baseLayers.forEach((l) => map.removeLayer(l));
-    baseLayers = BASE[style]();
-    let errors = 0;
-    baseLayers[0].on("tileerror", () => {
-      // provider down/blocked → fall back to the next one
-      if (++errors === 6 && style === "sat" && CONFIG.maptilerKey && !maptilerFailed) { maptilerFailed = true; console.warn("MapTiler key failed – using Esri imagery"); setBaseLayer("sat"); return; }
-      if (errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBaseLayer(style === "sat" ? "map" : "osm"); }
-    });
-    baseLayers.forEach((l) => l.addTo(map).bringToBack());
-    baseLayers[0].bringToBack();
-    state.mapStyle = style === "osm" ? "map" : style; save();
-    $("#view-map").classList.toggle("sat", style === "sat");
-    // button shows what you switch TO
-    $("#layerIc").innerHTML = ic(style === "sat" ? "map" : "globe");
-    $("#layerTxt").textContent = style === "sat" ? "Map" : "Satellite";
-  }
-  function markerIcon(p) {
+  function markerHTML(p) {
     const c = CATEGORIES[p.cat], { avg } = avgRating(p.id);
     const cls = ["mq-marker", isVisited(p.id) && "visited", !isUnlocked(p) && "locked", selectedId === p.id && "selected"].filter(Boolean).join(" ");
     const label = !isUnlocked(p) ? ic("lock", "ic-xs") : avg ? `★ ${avg.toFixed(1)}` : "new";
-    return L.divIcon({
-      className: "", iconSize: [44, 46], iconAnchor: [22, 44],
-      html: `<div class="${cls}" style="--c:${c.color}"><div class="mq-pin"></div><div class="mq-pin-ic">${ic(c.icon)}</div><div class="mq-rating">${label}</div></div>`,
+    return `<div class="${cls}" style="--c:${c.color}"><div class="mq-pin"></div><div class="mq-pin-ic">${ic(c.icon)}</div><div class="mq-rating">${label}</div></div>`;
+  }
+  const ME_HTML = '<div class="mq-me"></div>';
+
+  function initMap() {
+    const el = $("#map");
+    const startLeaflet = () => { el.innerHTML = ""; el.className = ""; mapApi = leafletMap(el); afterMapReady(); };
+    if (CONFIG.googleMapsKey) {
+      googleMap(el).then((api) => { mapApi = api; afterMapReady(); })
+        .catch((e) => { console.warn("Google Maps failed – using fallback map", e); toast("Google Maps unavailable – using backup map"); startLeaflet(); });
+    } else startLeaflet();
+    $("#locateBtn").onclick = () => { if (userPos) centerOnMe(); else startGeo(true); };
+    $("#funchalBtn").onclick = goFunchal;
+    $("#layerBtn").onclick = () => setMapStyle(state.mapStyle === "map" ? "sat" : "map");
+    renderChips();
+  }
+  function afterMapReady() {
+    PLACES.forEach((p) => mapApi.addMarker(p.id, p.lat, p.lng, markerHTML(p), () => selectPlace(p.id)));
+    mapApi.onMapClick(closeSheet);
+    setMapStyle(state.mapStyle || "sat");
+    applyFilter();
+    updateMe();
+  }
+  function setMapStyle(style) {
+    if (!mapApi) return;
+    mapApi.setStyle(style);
+    state.mapStyle = style; save();
+    $("#view-map").classList.toggle("sat", style === "sat");
+    $("#layerIc").innerHTML = ic(style === "sat" ? "map" : "globe"); // shows what you switch TO
+    $("#layerTxt").textContent = style === "sat" ? "Map" : "Satellite";
+  }
+
+  // ---------- Google Maps implementation ----------
+  function loadGoogleMaps() {
+    if (window.google && google.maps && google.maps.importLibrary) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("timeout")), 15000);
+      window.__mqGmapsReady = () => { clearTimeout(timer); resolve(); };
+      window.gm_authFailure = () => { clearTimeout(timer); reject(new Error("Google Maps key rejected")); if (window.__mqOnAuthFail) window.__mqOnAuthFail(); };
+      const s = document.createElement("script");
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(CONFIG.googleMapsKey)}&v=weekly&loading=async&callback=__mqGmapsReady`;
+      s.async = true; s.onerror = () => { clearTimeout(timer); reject(new Error("script load failed")); };
+      document.head.appendChild(s);
     });
   }
-  function refreshMarkers() { PLACES.forEach((p) => markers[p.id] && markers[p.id].setIcon(markerIcon(p))); }
+  async function googleMap(el) {
+    await loadGoogleMaps();
+    const { Map, Circle } = await google.maps.importLibrary("maps");
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+    const g = new Map(el, {
+      center: { lat: CONFIG.center[0], lng: CONFIG.center[1] }, zoom: CONFIG.zoom,
+      mapId: CONFIG.googleMapId || "DEMO_MAP_ID",
+      mapTypeId: state.mapStyle === "map" ? "roadmap" : "hybrid",
+      disableDefaultUI: true, gestureHandling: "greedy", clickableIcons: false, tilt: 0,
+    });
+    // key rejected after the map was created (e.g. billing off) → swap to the backup map
+    window.__mqOnAuthFail = () => { toast("Google Maps key rejected – using backup map"); el.innerHTML = ""; mapApi = leafletMap(el); afterMapReady(); };
+    const mk = {}; let me = null, acc = null;
+    const box = (html) => { const d = document.createElement("div"); d.innerHTML = html; return d; };
+    return {
+      kind: "google",
+      addMarker(id, lat, lng, html, onClick) {
+        const m = new AdvancedMarkerElement({ map: g, position: { lat, lng }, content: box(html), gmpClickable: true });
+        m.addListener("click", onClick);
+        mk[id] = m;
+      },
+      updateMarker(id, html) { if (mk[id]) mk[id].content.innerHTML = html; },
+      showMarker(id, on) { if (mk[id]) mk[id].map = on ? g : null; },
+      setMe(lat, lng, accuracy) {
+        const pos = { lat, lng };
+        if (!me) {
+          const d = box(ME_HTML); d.style.transform = "translateY(50%)";
+          me = new AdvancedMarkerElement({ map: g, position: pos, content: d, zIndex: 1000 });
+          acc = new Circle({ map: g, center: pos, radius: accuracy, strokeColor: "#2F80ED", strokeWeight: 1, fillColor: "#2F80ED", fillOpacity: 0.1, clickable: false });
+        } else { me.position = pos; acc.setCenter(pos); acc.setRadius(accuracy); }
+      },
+      flyTo(lat, lng, zoom) { g.panTo({ lat, lng }); if (zoom != null) g.setZoom(zoom); },
+      panTo(lat, lng) { g.panTo({ lat, lng }); },
+      onMapClick(fn) { g.addListener("click", fn); },
+      setStyle(style) { g.setMapTypeId(style === "map" ? "roadmap" : "hybrid"); },
+      resize() {},
+    };
+  }
+
+  // ---------- Leaflet fallback implementation ----------
+  function leafletMap(el) {
+    const m = L.map(el, { zoomControl: false }).setView(CONFIG.center, CONFIG.zoom);
+    const mk = {}; let me = null, acc = null, layers = [], maptilerFailed = false;
+    const icon = (html) => L.divIcon({ className: "", iconSize: [44, 46], iconAnchor: [22, 44], html });
+    const BASE = {
+      sat: () => CONFIG.maptilerKey && !maptilerFailed
+        ? [L.tileLayer(`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}{r}.jpg?key=${CONFIG.maptilerKey}`, { maxZoom: 20, attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; OSM contributors' })]
+        : [
+            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, className: "sat-imagery", attribution: "Imagery &copy; Esri, Maxar &middot; Labels &copy; CARTO, OSM" }),
+            L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", className: "sat-labels" }),
+          ],
+      map: () => [L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19, subdomains: "abcd", attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>' })],
+      osm: () => [L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' })],
+    };
+    function setBase(style) {
+      layers.forEach((l) => m.removeLayer(l));
+      layers = BASE[style]();
+      let errors = 0;
+      layers[0].on("tileerror", () => {
+        if (++errors === 6 && style === "sat" && CONFIG.maptilerKey && !maptilerFailed) { maptilerFailed = true; setBase("sat"); return; }
+        if (errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBase(style === "sat" ? "map" : "osm"); }
+      });
+      layers.forEach((l) => l.addTo(m));
+      layers[0].bringToBack();
+    }
+    return {
+      kind: "leaflet",
+      addMarker(id, lat, lng, html, onClick) {
+        mk[id] = L.marker([lat, lng], { icon: icon(html) }).addTo(m).on("click", (e) => { L.DomEvent.stopPropagation(e); onClick(); });
+      },
+      updateMarker(id, html) { if (mk[id]) mk[id].setIcon(icon(html)); },
+      showMarker(id, on) { const x = mk[id]; if (!x) return; if (on && !m.hasLayer(x)) x.addTo(m); if (!on && m.hasLayer(x)) m.removeLayer(x); },
+      setMe(lat, lng, accuracy) {
+        if (!me) {
+          me = L.marker([lat, lng], { icon: L.divIcon({ className: "", html: ME_HTML, iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000, interactive: false }).addTo(m);
+          acc = L.circle([lat, lng], { radius: accuracy, color: "#2F80ED", weight: 1, fillOpacity: 0.08, interactive: false }).addTo(m);
+        } else { me.setLatLng([lat, lng]); acc.setLatLng([lat, lng]).setRadius(accuracy); }
+      },
+      flyTo(lat, lng, zoom) { m.flyTo([lat, lng], zoom ?? m.getZoom(), { duration: 0.9 }); },
+      panTo(lat, lng) { m.panTo([lat, lng], { animate: true }); },
+      onMapClick(fn) { m.on("click", fn); },
+      setStyle(style) { setBase(style); },
+      resize() { m.invalidateSize(); },
+    };
+  }
+
+  function refreshMarkers() { if (mapApi) PLACES.forEach((p) => mapApi.updateMarker(p.id, markerHTML(p))); }
   function renderChips() {
     const chips = [["all", "All", "grid"], ...Object.entries(CATEGORIES).map(([k, c]) => [k, c.label, c.icon])];
     $("#chips").innerHTML = chips.map(([k, l, e]) => `<button class="chip ${state.filter === k ? "active" : ""}" data-f="${k}">${ic(e)}${l}</button>`).join("");
@@ -510,18 +575,15 @@
     };
   }
   function applyFilter() {
-    PLACES.forEach((p) => {
-      const show = state.filter === "all" || p.cat === state.filter, m = markers[p.id];
-      if (show && !map.hasLayer(m)) m.addTo(map);
-      if (!show && map.hasLayer(m)) map.removeLayer(m);
-    });
+    if (!mapApi) return;
+    PLACES.forEach((p) => mapApi.showMarker(p.id, state.filter === "all" || p.cat === state.filter));
   }
   function selectPlace(id) {
     const prev = selectedId; selectedId = id;
-    if (prev && markers[prev]) markers[prev].setIcon(markerIcon(byId(prev)));
-    markers[id].setIcon(markerIcon(byId(id)));
+    if (prev) mapApi.updateMarker(prev, markerHTML(byId(prev)));
+    mapApi.updateMarker(id, markerHTML(byId(id)));
     const p = byId(id);
-    map.panTo([p.lat - 0.0012, p.lng], { animate: true });
+    mapApi.panTo(p.lat - 0.0012, p.lng);
     renderSheet(id);
   }
   function renderSheet(id, silent) {
@@ -548,7 +610,7 @@
   function closeSheet() {
     $("#sheet").classList.remove("open"); $("#view-map").classList.remove("sheet-open");
     const prev = selectedId; selectedId = null;
-    if (prev && markers[prev]) markers[prev].setIcon(markerIcon(byId(prev)));
+    if (prev && mapApi) mapApi.updateMarker(prev, markerHTML(byId(prev)));
   }
 
   // ---------- Place page ----------
@@ -874,7 +936,7 @@
     if (page === "place") { show("view-place"); renderPlace(arg); $("#view-place").scrollTop = 0; }
     else if (page === "quests") { show("view-quests"); renderQuests(); $("#view-quests").scrollTop = 0; }
     else if (page === "profile") { show("view-profile"); renderProfile(); $("#view-profile").scrollTop = 0; }
-    else { show("view-map"); if (map) setTimeout(() => map.invalidateSize(), 0); }
+    else { show("view-map"); if (mapApi) setTimeout(() => mapApi.resize(), 0); }
     prevRoute = lastRoute; lastRoute = h;
   }
 
@@ -884,7 +946,7 @@
     $("#tabbar").hidden = false;
     $("#brandSmall").innerHTML = `${LOGO}<div>Madeira <span>Quest</span></div>`;
     show("view-map"); // map container must be visible before Leaflet measures it
-    if (!map) initMap();
+    if (!mapInited) { mapInited = true; initMap(); }
     updateScore();
     route();
     syncUser();

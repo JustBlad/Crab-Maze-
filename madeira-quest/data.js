@@ -19,6 +19,10 @@ const CONFIG = {
   // Optional: free key from https://cloud.maptiler.com (no credit card) for the
   // sharpest, most colourful satellite map. Empty = free Esri imagery.
   maptilerKey: "iATCxHYYgZaPl2865zvK",
+  // Google Maps (best look). Paste your Google Maps JavaScript API key here.
+  // Empty = the MapTiler/Esri map above is used instead.
+  googleMapsKey: "",
+  googleMapId: "",   // optional: your own Map ID from Google Cloud (else Google's demo ID)
 };
 
 const CATEGORIES = {

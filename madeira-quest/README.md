@@ -37,6 +37,22 @@ python3 -m http.server 8000
 - Orte, Texte, Koordinaten: `data.js` (Koordinaten sind noch ungefähr – in Google Maps lange drücken, Zahlen kopieren)
 - Sprache der App: Englisch (für alle Erasmus-Studis)
 
+## Google Maps einrichten (schönste Karte)
+Ohne Key nutzt die App MapTiler/Esri. Mit Key wird die echte Google-Maps-Karte (Satellit + Straßen) angezeigt.
+
+1. https://console.cloud.google.com → oben **Projekt auswählen → Neues Projekt** (z. B. „Madeira Quest“).
+2. **Abrechnung aktivieren** (Menü → *Abrechnung*). Google verlangt eine Karte, aber Kartenaufrufe sind bis zu
+   einem monatlichen Gratis-Kontingent kostenlos – für eine Erasmus-Gruppe reicht das locker.
+   Tipp: unter *Abrechnung → Budgets & Benachrichtigungen* ein Budget von 1 € mit E-Mail-Warnung anlegen.
+3. Menü → **APIs & Dienste → Bibliothek** → „**Maps JavaScript API**“ → **Aktivieren**.
+4. Menü → **APIs & Dienste → Anmeldedaten → Anmeldedaten erstellen → API-Schlüssel**.
+5. Den Schlüssel **einschränken** (wichtig, er steht öffentlich im Code):
+   - *Anwendungseinschränkungen*: **Websites** → `https://DEINNAME.github.io/*` und `http://localhost:8000/*`
+   - *API-Einschränkungen*: nur **Maps JavaScript API**
+6. Schlüssel in `data.js` bei `googleMapsKey: ""` eintragen.
+
+Wird der Schlüssel abgelehnt (falsch, Abrechnung aus, falsche Domain), schaltet die App automatisch auf die Ersatzkarte.
+
 ## Echtes Teilen mit Firebase (kostenlos)
 Ohne Config läuft die App im **Demo-Modus** (Beispiel-Studis, alles nur auf dem eigenen Handy).
 Mit Firebase sehen alle die Fotos, Bewertungen und Punkte der anderen – live.
