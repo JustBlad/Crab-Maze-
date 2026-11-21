@@ -122,6 +122,44 @@
     return d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;
   }
 
+
+  // ---------- Line icons (Lucide-style, 24px grid) ----------
+  const ICONS = {
+    coffee: '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
+    waves: '<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+    martini: '<path d="M8 22h8"/><path d="M12 11v11"/><path d="m19 3-7 8-7-8Z"/>',
+    utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+    icecream: '<path d="m7 11 4.08 10.35a1 1 0 0 0 1.84 0L17 11"/><path d="M17 7A5 5 0 0 0 7 7"/><path d="M17 7a2 2 0 0 1 0 4H7a2 2 0 0 1 0-4"/>',
+    grid: '<rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><rect width="7" height="7" x="3" y="14" rx="1.5"/>',
+    map: '<path d="M14.1 6.3 9.9 4.2a2 2 0 0 0-1.8 0L3.6 6.4A1 1 0 0 0 3 7.3v12.1a1 1 0 0 0 1.4.9l3.7-1.9a2 2 0 0 1 1.8 0l4.2 2.1a2 2 0 0 0 1.8 0l4.5-2.2a1 1 0 0 0 .6-.9V4.6a1 1 0 0 0-1.4-.9l-3.7 1.9a2 2 0 0 1-1.8 0Z"/><path d="M15 5.8v15M9 3.2v15"/>',
+    globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    anchor: '<path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><circle cx="12" cy="5" r="3"/>',
+    pin: '<path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+    star: '<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9Z"/>',
+    lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    unlock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"/><circle cx="12" cy="13" r="3"/>',
+    plus: '<path d="M5 12h14M12 5v14"/>',
+    nav: '<path d="M3 11 22 2l-9 19-2-8Z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/>',
+    timer: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    pencil: '<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1Z"/><path d="M4 22v-7"/>',
+    sprout: '<path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8Z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2Z"/>',
+    award: '<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    alert: '<path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4M12 17h.01"/>',
+    arrow: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/>',
+    image: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  };
+  const ic = (name, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+
   // ---------- Art (illustrated placeholder pictures) ----------
   const LOGO = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
     <defs><linearGradient id="lg-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FD3F2"/><stop offset="1" stop-color="#2FA6D9"/></linearGradient>
@@ -136,7 +174,7 @@
   const PALETTES = {
     beach: [["#8FD8F5", "#FFE3B8"], ["#FFB27A", "#FFD9A8"], ["#6EC6EC", "#E9F7FF"], ["#FF9E7A", "#FFE0C2"]],
     cafe:  [["#FFE1C7", "#FFC79A"], ["#F6D5B8", "#E7B48A"], ["#FFEBD9", "#FFB98A"], ["#FDE4CF", "#F3B98C"]],
-    bar:   [["#3B2C5E", "#7B4FB8"], ["#2A2347", "#C0568C"], ["#432B6B", "#FF7A1A"], ["#251F3D", "#5E8BFF"]],
+    bar:   [["#3A1424", "#8E2C48"], ["#0E2A47", "#8E2C48"], ["#4A1A2D", "#F26B1D"], ["#0E2A47", "#1E7FA8"]],
     food:  [["#E5F6EA", "#BFE6C8"], ["#FFF1DC", "#F8D29A"], ["#E9F7EE", "#A9DDB8"], ["#FFF4E6", "#FFC98F"]],
     sweet: [["#FFE3F1", "#FFC1DD"], ["#FFF0E0", "#FFD0E4"], ["#E6F4FF", "#FFD6EA"], ["#FFF5D6", "#FFC7DF"]],
   };
@@ -366,7 +404,7 @@
     if (!userPos || !map) return;
     map.flyTo([userPos.lat, userPos.lng], 16, { duration: 0.9 });
     const km = haversine(userPos, { lat: CONFIG.center[0], lng: CONFIG.center[1] }) / 1000;
-    if (km > 15) toast(`You're ${km < 100 ? km.toFixed(0) : Math.round(km).toLocaleString("en")} km from Funchal – tap 🏝️ to jump back`);
+    if (km > 15) toast(`You're ${km < 100 ? km.toFixed(0) : Math.round(km).toLocaleString("en")} km from Funchal – tap “Funchal” to jump back`);
   }
   function goFunchal() { map.flyTo(CONFIG.center, CONFIG.zoom, { duration: 0.9 }); }
   function refreshDistances() {
@@ -382,10 +420,10 @@
     const d = distTo(p);
     if (d == null) {
       el.className = "gps-state";
-      el.innerHTML = `📍 <a href="#" id="gpsAsk" style="text-decoration:underline">Turn on location</a> for the on-site bonus (+${CONFIG.points.verified})`;
+      el.innerHTML = `${ic("pin")} <a href="#" id="gpsAsk" style="text-decoration:underline">Turn on location</a> for the on-site bonus (+${CONFIG.points.verified})`;
       $("#gpsAsk").onclick = (e) => { e.preventDefault(); startGeo(true); };
     } else if (d <= CONFIG.checkinRadius) {
-      el.className = "gps-state ok"; el.textContent = `✓ You're here – verified visit (+${CONFIG.points.verified} bonus)`;
+      el.className = "gps-state ok"; el.innerHTML = `${ic("check")} You're here – verified visit (+${CONFIG.points.verified} bonus)`;
     } else {
       el.className = "gps-state"; el.textContent = `You're ${fmtDist(d)} away. Upload on site for +${CONFIG.points.verified} bonus points.`;
     }
@@ -450,22 +488,22 @@
     state.mapStyle = style === "osm" ? "map" : style; save();
     $("#view-map").classList.toggle("sat", style === "sat");
     // button shows what you switch TO
-    $("#layerIc").textContent = style === "sat" ? "🗺️" : "🛰️";
+    $("#layerIc").innerHTML = ic(style === "sat" ? "map" : "globe");
     $("#layerTxt").textContent = style === "sat" ? "Map" : "Satellite";
   }
   function markerIcon(p) {
     const c = CATEGORIES[p.cat], { avg } = avgRating(p.id);
     const cls = ["mq-marker", isVisited(p.id) && "visited", !isUnlocked(p) && "locked", selectedId === p.id && "selected"].filter(Boolean).join(" ");
-    const label = !isUnlocked(p) ? "🔒" : avg ? `★ ${avg.toFixed(1)}` : "new";
+    const label = !isUnlocked(p) ? ic("lock", "ic-xs") : avg ? `★ ${avg.toFixed(1)}` : "new";
     return L.divIcon({
       className: "", iconSize: [44, 46], iconAnchor: [22, 44],
-      html: `<div class="${cls}" style="--c:${c.color}"><div class="mq-pin"></div><div class="mq-pin-ic">${c.emoji}</div><div class="mq-rating">${label}</div></div>`,
+      html: `<div class="${cls}" style="--c:${c.color}"><div class="mq-pin"></div><div class="mq-pin-ic">${ic(c.icon)}</div><div class="mq-rating">${label}</div></div>`,
     });
   }
   function refreshMarkers() { PLACES.forEach((p) => markers[p.id] && markers[p.id].setIcon(markerIcon(p))); }
   function renderChips() {
-    const chips = [["all", "All", "✨"], ...Object.entries(CATEGORIES).map(([k, c]) => [k, c.label, c.emoji])];
-    $("#chips").innerHTML = chips.map(([k, l, e]) => `<button class="chip ${state.filter === k ? "active" : ""}" data-f="${k}">${e} ${l}</button>`).join("");
+    const chips = [["all", "All", "grid"], ...Object.entries(CATEGORIES).map(([k, c]) => [k, c.label, c.icon])];
+    $("#chips").innerHTML = chips.map(([k, l, e]) => `<button class="chip ${state.filter === k ? "active" : ""}" data-f="${k}">${ic(e)}${l}</button>`).join("");
     $("#chips").onclick = (e) => {
       const b = e.target.closest(".chip"); if (!b) return;
       state.filter = b.dataset.f; save(); renderChips(); applyFilter(); closeSheet();
@@ -490,18 +528,18 @@
     const p = byId(id), c = CATEGORIES[p.cat], { avg, count } = avgRating(id), v = visitorsOf(id), d = distTo(p);
     const unlocked = isUnlocked(p), visit = state.visits[id];
     $("#sheet").innerHTML = `
-      <button class="sheet-close" aria-label="Close">✕</button>
+      <button class="sheet-close" aria-label="Close">${ic("x")}</button>
       <div class="sheet-card">
         <div class="sheet-thumb ph">${visit && visit.photo ? `<img src="${visit.photo}" alt="">` : placeArt(p, 0)}</div>
         <div class="sheet-body">
-          <span class="tag ${visit ? "green" : !unlocked ? "grey" : ""}" style="align-self:flex-start">${visit ? "✓ Visited" : !unlocked ? "🔒 Level " + p.level : c.emoji + " " + c.label}</span>
+          <span class="tag ${visit ? "green" : !unlocked ? "grey" : ""}" style="align-self:flex-start">${visit ? ic("check", "ic-sm") + " Visited" : !unlocked ? ic("lock", "ic-sm") + " Level " + p.level : ic(c.icon, "ic-sm") + " " + c.label}</span>
           <div class="sheet-title">${esc(p.name)}</div>
           <div class="sheet-meta">${count ? `${starsHTML(avg)} <b style="color:var(--ink)">${avg.toFixed(1)}</b> (${count})` : "No ratings yet"} · ${fmtDist(d)}</div>
-          <div class="sheet-social">${v.length ? `${avatarsHTML(v, 3)} ${plural(v.length, "student has", "students have")} been here` : "🌱 Be the first one here!"}</div>
+          <div class="sheet-social">${v.length ? `${avatarsHTML(v, 3)} ${plural(v.length, "student has", "students have")} been here` : ic("sprout") + " Be the first one here!"}</div>
         </div>
       </div>
       <div class="sheet-actions">
-        <a class="btn btn-outline" href="${routeURL(p)}" target="_blank" rel="noopener">🧭 Route</a>
+        <a class="btn btn-outline" href="${routeURL(p)}" target="_blank" rel="noopener">${ic("nav")} Route</a>
         <a class="btn btn-primary" href="#/place/${p.id}">Open</a>
       </div>`;
     $(".sheet-close").onclick = closeSheet;
@@ -539,20 +577,20 @@
 
     let action;
     if (!unlocked) {
-      action = `<div class="empty">🔒 Visit <b>${plural(missing, "more Level 1 place", "more Level 1 places")}</b> to unlock this one.</div>`;
+      action = `<div class="empty">${ic("lock")} Visit <b>${plural(missing, "more Level 1 place", "more Level 1 places")}</b> to unlock this one.</div>`;
     } else if (!visit) {
       action = `<div class="upload-card">
           <div class="upload-ic">+</div>
           <h3>Been here?</h3>
           <p>Upload a photo of this place to unlock the gallery${others ? ` of the <b>${others}</b> other ${others === 1 ? "student" : "students"}` : ""}.</p>
-          <button class="btn btn-primary btn-block" id="uploadBtn">📸 Upload photo</button>
+          <button class="btn btn-primary btn-block" id="uploadBtn">${ic("camera")} Upload photo</button>
           <div class="gps-state" id="gpsState"></div>
         </div>`;
     } else {
       const my = state.ratings[id] || 0;
       action = `<div class="done-card">
-          <div class="done-check">✓</div>
-          <div><b>Visited!</b><small>${visit.verified ? "📍 Verified on site" : "Photo uploaded"} · ${new Date(visit.ts).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</small></div>
+          <div class="done-check">${ic("check")}</div>
+          <div><b>Visited!</b><small>${visit.verified ? ic("pin", "ic-sm") + " Verified on site" : "Photo uploaded"} · ${new Date(visit.ts).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</small></div>
           ${visit.photo ? `<div class="done-thumb"><img src="${visit.photo}" alt=""></div>` : ""}
         </div>
         <div class="rate-box">
@@ -569,41 +607,41 @@
       <div class="place-top">
         <button class="icon-btn" id="backBtn" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <h1>${esc(p.name)}</h1>
-        <button class="icon-btn fav-btn ${fav ? "on" : ""}" id="favBtn" aria-label="Save">${fav ? "★" : "☆"}</button>
+        <button class="icon-btn fav-btn ${fav ? "on" : ""}" id="favBtn" aria-label="Save">${ic("star", fav ? "ic-fill" : "")}</button>
       </div>
-      ${!unlocked ? `<div class="locked-banner"><span style="font-size:26px">🔒</span><div><b>Level ${p.level} – still locked</b>${plural(missing, "more place", "more places")} from Level 1 and it's yours.</div></div>` : ""}
+      ${!unlocked ? `<div class="locked-banner"><span class="lb-ic">${ic("lock")}</span><div><b>Level ${p.level} – still locked</b>${plural(missing, "more place", "more places")} from Level 1 and it's yours.</div></div>` : ""}
       <div class="gallery-hero">${[0, 1, 2].map((i) => `<div class="ph">${placeArt(p, i)}</div>`).join("")}</div>
       <div class="place-body">
         <div class="place-head">
           <div>
-            <div class="place-cat">${c.emoji} ${c.label} · ${esc(p.area)} · Level ${p.level}</div>
+            <div class="place-cat">${c.label} · ${esc(p.area)} · Level ${p.level}</div>
             <div class="place-rating">${count ? `<b>${avg.toFixed(1)}</b>${starsHTML(avg)}<small>(${count})</small>` : `<small>No ratings yet</small>`}</div>
           </div>
           <div class="place-dist"><b id="distVal">${fmtDist(d)}</b><small id="distSub">${walkMin(d) || "Distance"}</small></div>
         </div>
         <p class="place-desc">${esc(p.desc)}</p>
         <div class="info-row">
-          <div class="info-box"><b>Tip</b>${esc(p.tip)}</div>
-          <div class="info-box"><b>Open</b>${esc(p.hours)}</div>
+          <div class="info-box"><b>${ic("bulb", "ic-sm")} Tip</b>${esc(p.tip)}</div>
+          <div class="info-box"><b>${ic("clock", "ic-sm")} Open</b>${esc(p.hours)}</div>
         </div>
         ${v.length
           ? `<div class="social-proof">${avatarsHTML(v, 4)}<span><b>${plural(v.length, "student", "students")}</b> from your group ${v.length === 1 ? "has" : "have"} been here</span></div>`
-          : `<div class="social-proof">🌱 <span>Nobody has been here yet – <b>be the first</b> and earn the Pioneer badge!</span></div>`}
-        <a class="btn btn-ghost btn-block" href="${routeURL(p)}" target="_blank" rel="noopener" style="margin-bottom:18px">🧭 Directions in Google Maps</a>
+          : `<div class="social-proof">${ic("sprout")}<span>Nobody has been here yet – <b>be the first</b> and earn the Pioneer badge!</span></div>`}
+        <a class="btn btn-ghost btn-block" href="${routeURL(p)}" target="_blank" rel="noopener" style="margin-bottom:18px">${ic("nav")} Directions in Google Maps</a>
 
         ${action}
 
         <div class="section-title">Group gallery <small id="photoCount">${visit ? plural(nPhotos, "photo", "photos") : ""}</small></div>
         <div id="galleryWrap">${visit
           ? galleryHTML(p)
-          : `<div class="gallery-grid locked">${lockedCells}<div class="lock-overlay"><div class="lock-ic">🔒</div><b>Upload a photo to see the gallery</b></div></div>`}</div>
+          : `<div class="gallery-grid locked">${lockedCells}<div class="lock-overlay"><div class="lock-ic">${ic("lock")}</div><b>Upload a photo to see the gallery</b></div></div>`}</div>
       </div>`;
 
     $("#backBtn").onclick = () => { if (prevRoute) history.back(); else location.hash = "#/map"; };
     $("#favBtn").onclick = () => {
       const i = state.favorites.indexOf(id);
       if (i >= 0) state.favorites.splice(i, 1); else state.favorites.push(id);
-      save(); keepScroll("#view-place", () => renderPlace(id, true)); toast(i >= 0 ? "Removed from saved" : "⭐ Saved");
+      save(); keepScroll("#view-place", () => renderPlace(id, true)); toast(i >= 0 ? "Removed from saved" : "Saved");
     };
     const ub = $("#uploadBtn");
     if (ub) ub.onclick = () => { pendingUpload = id; const fi = $("#fileInput"); fi.value = ""; fi.click(); };
@@ -660,7 +698,7 @@
     openModal(`
       <img class="preview" src="${data}" alt="Preview">
       <h2>${esc(p.name)}</h2>
-      <p>${verified ? "📍 You're on site – your visit will be verified." : d == null ? "Location unknown – saved without the GPS bonus." : `You're ${fmtDist(d)} away – saved without the GPS bonus.`}</p>
+      <p>${verified ? "You're on site – your visit will be verified." : d == null ? "Location unknown – saved without the GPS bonus." : `You're ${fmtDist(d)} away – saved without the GPS bonus.`}</p>
       <label class="field"><input id="capInput" maxlength="40" placeholder="Add a caption (optional)"></label>
       <label style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:16px;font-size:14px;font-weight:600">
         <input type="checkbox" id="shareChk" checked style="width:20px;height:20px;accent-color:var(--orange)"> Share in the group gallery
@@ -688,11 +726,11 @@
       renderPlace(id);
       if (wasL2Locked && level1Done() >= CONFIG.level2Unlock) {
         setTimeout(() => {
-          openModal(`<div class="m-ic">🔓</div><h2>Level 2 unlocked!</h2><p>Nice! You visited ${CONFIG.level2Unlock} Level 1 places. ${PLACES.filter((x) => x.level === 2).length} new places are waiting for you.</p><div class="btns"><a class="btn btn-primary btn-block" href="#/quests" id="toQuests">Go to quests</a></div>`);
+          openModal(`<div class="m-ic">${ic("unlock")}</div><h2>Level 2 unlocked!</h2><p>Nice! You visited ${CONFIG.level2Unlock} Level 1 places. ${PLACES.filter((x) => x.level === 2).length} new places are waiting for you.</p><div class="btns"><a class="btn btn-primary btn-block" href="#/quests" id="toQuests">Go to quests</a></div>`);
           $("#toQuests").onclick = closeModal;
         }, 900);
       } else {
-        toast(weeklyNow ? `🏅 Weekly challenge done! +${pts + CONFIG.points.weekly} points` : `🎉 Gallery unlocked! +${pts} points`);
+        toast(weeklyNow ? `Weekly challenge done! +${pts + CONFIG.points.weekly} points` : `Gallery unlocked! +${pts} points`);
       }
     };
   }
@@ -706,17 +744,17 @@
       const done = list.filter((p) => isVisited(p.id)).length;
       const locked = lvl > 1 && l1 < CONFIG.level2Unlock;
       return `<div class="level ${locked ? "locked" : ""}">
-        <div class="level-head"><h2><span class="level-badge">${locked ? "🔒" : lvl}</span>Level ${lvl}</h2><small>${done}/${list.length}</small></div>
+        <div class="level-head"><h2><span class="level-badge">${locked ? ic("lock", "ic-sm") : lvl}</span>Level ${lvl}</h2><small>${done}/${list.length}</small></div>
         ${locked
-          ? `<div class="level-lock">🔒 <span><b>${plural(CONFIG.level2Unlock - l1, "more place", "more places")}</b> from Level 1 to unlock</span></div>`
+          ? `<div class="level-lock">${ic("lock")}<span><b>${plural(CONFIG.level2Unlock - l1, "more place", "more places")}</b> from Level 1 to unlock</span></div>`
           : `<div class="progress dark" style="margin-bottom:12px"><i style="width:${(done / list.length) * 100}%"></i></div>`}
         <div class="place-list">${list.map((p) => {
           const { avg, count } = avgRating(p.id), c = CATEGORIES[p.cat], n = visitorsOf(p.id).length, vis = state.visits[p.id];
           return `<a class="place-row" href="#/place/${p.id}">
             <div class="pr-thumb ph">${vis && vis.photo ? `<img src="${vis.photo}" alt="">` : placeArt(p, 0)}</div>
             <div class="pr-body"><b>${esc(p.name)}</b>
-              <small>${c.emoji} ${c.label} · ${count ? `★ ${avg.toFixed(1)}` : "new"} · ${n ? `👥 ${n}` : "🌱 nobody yet"}${userPos ? ` · ${fmtDist(distTo(p))}` : ""}</small></div>
-            <div class="pr-state ${vis ? "done" : ""}">${vis ? "✓" : "+" + CONFIG.points.visit}</div>
+              <small>${c.label} · ${count ? `★ ${avg.toFixed(1)}` : "new"} · ${n ? `${n} visited` : "nobody yet"}${userPos ? ` · ${fmtDist(distTo(p))}` : ""}</small></div>
+            <div class="pr-state ${vis ? "done" : ""}">${vis ? ic("check") : "+" + CONFIG.points.visit}</div>
           </a>`;
         }).join("")}</div></div>`;
     };
@@ -727,22 +765,22 @@
           <div class="hc-label">Places discovered</div>
           <div class="hc-big">${visited}<small> / ${total}</small></div>
           <div class="progress"><i style="width:${(visited / total) * 100}%"></i></div>
-          <div class="hc-row"><span>⭐ ${state.points} points</span><span>${visited === total ? "🏆 All discovered!" : `${total - visited} to go`}</span></div>
+          <div class="hc-row"><span>${state.points} points</span><span>${visited === total ? "All discovered!" : `${total - visited} to go`}</span></div>
         </div>
         <div class="mini-cards">
           <div class="mini-card ${st.n && !st.today ? "warn" : ""}">
-            <div class="mc-ic">🔥</div><b>${plural(st.n, "day", "days")}</b>
-            <small>${st.n && !st.today ? "Visit a place today or you'll lose your streak!" : st.today ? "Streak secured for today 💪" : "Start your streak today"}</small>
+            <div class="mc-ic">${ic("flame")}</div><b>${plural(st.n, "day", "days")}</b>
+            <small>${st.n && !st.today ? "Visit a place today or you'll lose your streak!" : st.today ? "Streak secured for today" : "Start your streak today"}</small>
           </div>
           <div class="mini-card">
-            <div class="mc-ic">📍</div><b>${PLACES.filter((p) => isVisited(p.id) && state.visits[p.id].verified).length}</b>
+            <div class="mc-ic">${ic("pin")}</div><b>${PLACES.filter((p) => isVisited(p.id) && state.visits[p.id].verified).length}</b>
             <small>visits verified on site</small>
           </div>
         </div>
         <div class="challenge">
-          <div class="ch-ic">⏳</div>
+          <div class="ch-ic">${ic("timer")}</div>
           <div><b>Weekly challenge</b><small>${Math.min(wk, goal)}/${goal} places this week · +${CONFIG.points.weekly} bonus</small></div>
-          <div class="timer">${wk >= goal ? "✓ Done" : countdown(endOfWeek())}<small>${wk >= goal ? "" : "left"}</small></div>
+          <div class="timer">${wk >= goal ? "Done" : countdown(endOfWeek())}<small>${wk >= goal ? "" : "left"}</small></div>
         </div>
         ${levelBlock(1)}
         ${levelBlock(2)}
@@ -759,14 +797,14 @@
     const above = board[myRank - 2];
     const has = (cat) => visited.some((p) => p.cat === cat);
     const badges = [
-      ["👣", "First step", visited.length >= 1],
-      ["☕", "Café fan", has("cafe")],
-      ["🏖️", "Beach lover", has("beach")],
-      ["🍹", "Poncha pro", has("bar")],
-      ["📍", "On site", visited.some((p) => state.visits[p.id].verified)],
-      ["🌱", "Pioneer", visited.some((p) => !(community.visitors[p.id] || []).some((x) => (x.ts || 0) < state.visits[p.id].ts))],
-      ["🔓", "Level 2", level1Done() >= CONFIG.level2Unlock],
-      ["🏆", "Madeira master", visited.length === PLACES.length],
+      ["flag", "First step", visited.length >= 1],
+      ["coffee", "Café fan", has("cafe")],
+      ["waves", "Beach lover", has("beach")],
+      ["martini", "Poncha pro", has("bar")],
+      ["pin", "On site", visited.some((p) => state.visits[p.id].verified)],
+      ["sprout", "Pioneer", visited.some((p) => !(community.visitors[p.id] || []).some((x) => (x.ts || 0) < state.visits[p.id].ts))],
+      ["unlock", "Level 2", level1Done() >= CONFIG.level2Unlock],
+      ["award", "Madeira master", visited.length === PLACES.length],
     ];
     const photos = visited.filter((p) => state.visits[p.id].photo);
     const shown = board.slice(0, 15);
@@ -785,37 +823,37 @@
           <div class="stat"><b>${rated}</b><small>Ratings</small></div>
         </div>
 
-        <div class="section-title">Leaderboard <small>${LIVE ? "🟢 live" : "demo"}</small></div>
+        <div class="section-title">Leaderboard <small>${LIVE ? `<span class="live-dot"></span>live` : "demo"}</small></div>
         ${board.length < 2
-          ? `<div class="social-proof">👋 <span>You're the first one here – <b>share the link</b> with your Erasmus group!</span></div>`
+          ? `<div class="social-proof">${ic("users")}<span>You're the first one here – <b>share the link</b> with your Erasmus group!</span></div>`
           : above
-            ? `<div class="social-proof">🎯 <span>Only <b>${above.points - state.points + 1} points</b> until you overtake ${esc(above.name)}!</span></div>`
-            : `<div class="social-proof">👑 <span><b>You're #1!</b> Keep going to stay on top.</span></div>`}
-        <div class="leader">${shown.map((b) => { const i = board.indexOf(b); return `<div class="leader-row ${b.me ? "me" : ""}"><span class="rank">${i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}</span>${avatarHTML(b.name, b.color)}<span class="who">${esc(b.name)} ${b.flag || ""}${b.me ? " (you)" : ""}</span><span class="pts">${Number(b.points) || 0}</span></div>`; }).join("")}</div>
+            ? `<div class="social-proof">${ic("target")}<span>Only <b>${above.points - state.points + 1} points</b> until you overtake ${esc(above.name)}!</span></div>`
+            : `<div class="social-proof">${ic("award")}<span><b>You're #1!</b> Keep going to stay on top.</span></div>`}
+        <div class="leader">${shown.map((b) => { const i = board.indexOf(b); return `<div class="leader-row ${b.me ? "me" : ""}"><span class="rank">${i + 1}</span>${avatarHTML(b.name, b.color)}<span class="who">${esc(b.name)} ${b.flag || ""}${b.me ? " (you)" : ""}</span><span class="pts">${Number(b.points) || 0}</span></div>`; }).join("")}</div>
 
         <div class="section-title">Badges <small>${badges.filter((b) => b[2]).length}/${badges.length}</small></div>
-        <div class="badges">${badges.map(([ic, l, on]) => `<div class="badge ${on ? "" : "off"}"><div class="b-ic">${ic}</div>${l}</div>`).join("")}</div>
+        <div class="badges">${badges.map(([i, l, on]) => `<div class="badge ${on ? "" : "off"}"><div class="b-ic">${ic(i)}</div>${l}</div>`).join("")}</div>
 
         <div class="section-title">My photos <small>${photos.length}</small></div>
-        ${photos.length ? `<div class="my-photos">${photos.map((p) => `<a class="ph" href="#/place/${p.id}"><img src="${state.visits[p.id].photo}" alt="${esc(p.name)}"></a>`).join("")}</div>` : `<div class="empty">No photos yet. Pick a place on the map! 🗺️</div>`}
+        ${photos.length ? `<div class="my-photos">${photos.map((p) => `<a class="ph" href="#/place/${p.id}"><img src="${state.visits[p.id].photo}" alt="${esc(p.name)}"></a>`).join("")}</div>` : `<div class="empty">No photos yet. Pick a place on the map!</div>`}
 
-        ${state.favorites.length ? `<div class="section-title">Saved <small>${state.favorites.length}</small></div><div class="place-list">${state.favorites.map(byId).filter(Boolean).map((p) => `<a class="place-row" href="#/place/${p.id}"><div class="pr-thumb ph">${placeArt(p, 0)}</div><div class="pr-body"><b>${esc(p.name)}</b><small>${CATEGORIES[p.cat].emoji} ${CATEGORIES[p.cat].label}</small></div><div class="pr-state ${isVisited(p.id) ? "done" : ""}">${isVisited(p.id) ? "✓" : "→"}</div></a>`).join("")}</div>` : ""}
+        ${state.favorites.length ? `<div class="section-title">Saved <small>${state.favorites.length}</small></div><div class="place-list">${state.favorites.map(byId).filter(Boolean).map((p) => `<a class="place-row" href="#/place/${p.id}"><div class="pr-thumb ph">${placeArt(p, 0)}</div><div class="pr-body"><b>${esc(p.name)}</b><small>${CATEGORIES[p.cat].label}</small></div><div class="pr-state ${isVisited(p.id) ? "done" : ""}">${ic(isVisited(p.id) ? "check" : "arrow")}</div></a>`).join("")}</div>` : ""}
 
         <div class="section-title">Settings</div>
         <div class="settings">
-          <button id="geoSet"><span>📍 Location ${userPos ? "on" : "– turn on"}</span><span>${userPos ? "✓" : "→"}</span></button>
-          <button id="renameSet"><span>✏️ Change name</span><span>→</span></button>
-          <button id="resetSet" class="danger"><span>🗑️ Reset progress</span><span>→</span></button>
+          <button id="geoSet"><span>${ic("pin")} Location ${userPos ? "on" : "– turn on"}</span><span>${ic(userPos ? "check" : "arrow")}</span></button>
+          <button id="renameSet"><span>${ic("pencil")} Change name</span><span>${ic("arrow")}</span></button>
+          <button id="resetSet" class="danger"><span>${ic("trash")} Reset progress</span><span>${ic("arrow")}</span></button>
         </div>
         <p class="note">Fair &amp; honest: you can only rate a place after uploading a photo there. Your location is only used on your phone to show distances and verify visits – it's never uploaded.${LIVE ? "" : " (Prototype: the other students are example data.)"}</p>
       </div>`;
     $("#geoSet").onclick = () => startGeo(true);
     $("#renameSet").onclick = () => {
-      openModal(`<div class="m-ic">✏️</div><h2>New name</h2><label class="field"><input id="newName" maxlength="20" value="${esc(u.name)}"></label><div class="btns"><button class="btn btn-primary btn-block" id="saveName">Save</button></div>`);
+      openModal(`<div class="m-ic">${ic("pencil")}</div><h2>New name</h2><label class="field"><input id="newName" maxlength="20" value="${esc(u.name)}"></label><div class="btns"><button class="btn btn-primary btn-block" id="saveName">Save</button></div>`);
       $("#saveName").onclick = () => { const n = $("#newName").value.trim(); if (n) { state.user.name = n; save(); syncUser(); } closeModal(); renderProfile(); };
     };
     $("#resetSet").onclick = () => {
-      openModal(`<div class="m-ic">⚠️</div><h2>Reset everything?</h2><p>All your visits, photos and points will be deleted${LIVE ? " – also from the group gallery" : ""}.</p><div class="btns"><button class="btn btn-primary btn-block" id="doReset" style="background:#D33;box-shadow:none">Yes, delete everything</button><button class="btn btn-outline btn-block" id="noReset">Cancel</button></div>`);
+      openModal(`<div class="m-ic danger">${ic("alert")}</div><h2>Reset everything?</h2><p>All your visits, photos and points will be deleted${LIVE ? " – also from the group gallery" : ""}.</p><div class="btns"><button class="btn btn-primary btn-block" id="doReset" style="background:#D33;box-shadow:none">Yes, delete everything</button><button class="btn btn-outline btn-block" id="noReset">Cancel</button></div>`);
       $("#noReset").onclick = closeModal;
       $("#doReset").onclick = async () => {
         $("#doReset").disabled = true;
@@ -826,7 +864,7 @@
   }
 
   // ---------- Router ----------
-  function updateScore() { $("#scorePill").textContent = `⭐ ${state.points}`; }
+  function updateScore() { $("#scorePill").innerHTML = `${ic("star", "ic-fill")}${state.points}`; }
   function show(viewId) { ["view-map", "view-place", "view-quests", "view-profile"].forEach((v) => ($("#" + v).hidden = v !== viewId)); }
   function route() {
     if (!state.user) return;
@@ -857,6 +895,7 @@
 
   function boot() {
     $("#obLogo").innerHTML = LOGO;
+    document.querySelectorAll("[data-ic]").forEach((el) => (el.innerHTML = ic(el.dataset.ic)));
     $("#fileInput").addEventListener("change", onFileChosen);
     window.addEventListener("hashchange", route);
 
@@ -872,13 +911,13 @@
     const go = () => {
       const name = $("#obName").value.trim();
       if (!name) { $("#obName").focus(); toast("What should the others call you?"); return; }
-      const colors = ["#FF7A1A", "#1FA2D6", "#2BB673", "#9B5DE5", "#F15BB5", "#E63946"];
+      const colors = ["#F26B1D", "#1E7FA8", "#5E7B3A", "#8E2C48", "#E5746A", "#0E2A47", "#C8642E", "#3D8C8C"];
       state.user = { name, color: colors[Math.floor(Math.random() * colors.length)] };
       save();
       location.hash = "#/map";
       startApp();
       setTimeout(() => {
-        openModal(`<div class="m-ic">📍</div><h2>Allow location?</h2><p>We'll show how far away each place is, and you get <b>+${CONFIG.points.verified} bonus points</b> when you take a photo on site.</p><div class="btns"><button class="btn btn-primary btn-block" id="geoYes">Allow location</button><button class="btn btn-outline btn-block" id="geoNo">Later</button></div>`);
+        openModal(`<div class="m-ic">${ic("pin")}</div><h2>Allow location?</h2><p>We'll show how far away each place is, and you get <b>+${CONFIG.points.verified} bonus points</b> when you take a photo on site.</p><div class="btns"><button class="btn btn-primary btn-block" id="geoYes">Allow location</button><button class="btn btn-outline btn-block" id="geoNo">Later</button></div>`);
         $("#geoYes").onclick = () => { closeModal(); startGeo(true); };
         $("#geoNo").onclick = () => { closeModal(); state.geoAsked = true; save(); };
       }, 500);

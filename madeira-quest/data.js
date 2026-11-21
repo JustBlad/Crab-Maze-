@@ -22,11 +22,11 @@ const CONFIG = {
 };
 
 const CATEGORIES = {
-  cafe:  { label: "Cafés",     emoji: "☕", color: "#FF7A1A" },
-  beach: { label: "Beaches",   emoji: "🏖️", color: "#1FA2D6" },
-  bar:   { label: "Bars",      emoji: "🍹", color: "#9B5DE5" },
-  food:  { label: "Food",      emoji: "🥪", color: "#2BB673" },
-  sweet: { label: "Ice cream", emoji: "🍦", color: "#F15BB5" },
+  cafe:  { label: "Cafés",     icon: "coffee",   color: "#C8642E" },  // terracotta
+  beach: { label: "Beaches",   icon: "waves",    color: "#1E7FA8" },  // ocean blue
+  bar:   { label: "Bars",      icon: "martini",  color: "#8E2C48" },  // wine red
+  food:  { label: "Food",      icon: "utensils", color: "#5E7B3A" },  // olive
+  sweet: { label: "Ice cream", icon: "icecream", color: "#E5746A" },  // coral
 };
 
 const PLACES = [
@@ -145,14 +145,14 @@ const PLACES = [
 
 /* ---------- Demo community (only without Firebase) ---------- */
 const DEMO_USERS = [
-  { name: "Sofia",  country: "🇪🇸", color: "#FF7A1A", points: 640 },
-  { name: "Luca",   country: "🇮🇹", color: "#1FA2D6", points: 520 },
-  { name: "Emma",   country: "🇫🇷", color: "#F15BB5", points: 455 },
-  { name: "Jonas",  country: "🇩🇪", color: "#2BB673", points: 390 },
-  { name: "Ana",    country: "🇵🇱", color: "#9B5DE5", points: 310 },
-  { name: "Mats",   country: "🇳🇱", color: "#FFB000", points: 240 },
-  { name: "Clara",  country: "🇦🇹", color: "#E63946", points: 175 },
-  { name: "Niko",   country: "🇬🇷", color: "#118AB2", points: 95 },
+  { name: "Sofia",  country: "🇪🇸", color: "#F26B1D", points: 640 },
+  { name: "Luca",   country: "🇮🇹", color: "#1E7FA8", points: 520 },
+  { name: "Emma",   country: "🇫🇷", color: "#E5746A", points: 455 },
+  { name: "Jonas",  country: "🇩🇪", color: "#5E7B3A", points: 390 },
+  { name: "Ana",    country: "🇵🇱", color: "#8E2C48", points: 310 },
+  { name: "Mats",   country: "🇳🇱", color: "#C8642E", points: 240 },
+  { name: "Clara",  country: "🇦🇹", color: "#0E2A47", points: 175 },
+  { name: "Niko",   country: "🇬🇷", color: "#3D8C8C", points: 95 },
 ];
 
 // Per place: ratings (1–5), who has been there, and gallery captions.
