@@ -26,6 +26,7 @@
   });
 
   let state = load();
+  if (state.mapStyleV !== 2) { state.mapStyle = "streets"; state.mapStyleV = 2; } // new default after style update
   let userPos = null;      // { lat, lng, acc }
   let geoWatchId = null;
   let mapInited = false;
@@ -430,6 +431,17 @@
   // =========================================================
   let mapApi = null;
 
+  // Map styles the user can pick (layer button). "sat" = satellite with labels.
+  const MAP_STYLES = [
+    { id: "streets", name: "Streets",   mt: "streets-v2", hint: "Classic, Google-like",  sw: ["#F5F3EE", "#FFFFFF", "#F2C94C"] },
+    { id: "bright",  name: "Bright",    mt: "bright-v2",  hint: "Colourful & friendly",   sw: ["#F8F4EC", "#FFD86B", "#8FD0F0"] },
+    { id: "basic",   name: "Minimal",   mt: "basic-v2",   hint: "Clean, few details",     sw: ["#F3F1EC", "#FFFFFF", "#CFE4EE"] },
+    { id: "dataviz", name: "Light",     mt: "dataviz",    hint: "Very calm, pins stand out", sw: ["#F6F6F4", "#E9E9E6", "#D5E4EC"] },
+    { id: "outdoor", name: "Outdoor",   mt: "outdoor-v2", hint: "Hills & hiking paths",   sw: ["#EEF0E4", "#C9DDB0", "#9CC8E0"] },
+    { id: "sat",     name: "Satellite", mt: "hybrid",     hint: "Photo with street names", sw: ["#3B5A3A", "#6E8B5A", "#1E5A7A"], ext: "jpg" },
+  ];
+  const styleById = (id) => MAP_STYLES.find((x) => x.id === id) || MAP_STYLES[0];
+
   function markerHTML(p) {
     const c = CATEGORIES[p.cat], { avg } = avgRating(p.id);
     const cls = ["mq-marker", isVisited(p.id) && "visited", !isUnlocked(p) && "locked", selectedId === p.id && "selected"].filter(Boolean).join(" ");
@@ -447,23 +459,48 @@
     } else startLeaflet();
     $("#locateBtn").onclick = () => { if (userPos) centerOnMe(); else startGeo(true); };
     $("#funchalBtn").onclick = goFunchal;
-    $("#layerBtn").onclick = () => setMapStyle(state.mapStyle === "map" ? "sat" : "map");
+    $("#layerBtn").onclick = (e) => { e.stopPropagation(); toggleStyleMenu(); };
+    $("#styleMenu").onclick = (e) => {
+      e.stopPropagation();
+      const b = e.target.closest("[data-style]"); if (!b) return;
+      setMapStyle(b.dataset.style); toggleStyleMenu(false);
+    };
+    document.addEventListener("click", () => { const m = $("#styleMenu"); if (m && !m.hidden) toggleStyleMenu(false); });
     renderChips();
   }
   function afterMapReady() {
     PLACES.forEach((p) => mapApi.addMarker(p.id, p.lat, p.lng, markerHTML(p), () => selectPlace(p.id)));
     mapApi.onMapClick(closeSheet);
-    setMapStyle(state.mapStyle || "sat");
+    setMapStyle(state.mapStyle || "streets");
     applyFilter();
     updateMe();
   }
   function setMapStyle(style) {
     if (!mapApi) return;
-    mapApi.setStyle(style);
-    state.mapStyle = style; save();
-    $("#view-map").classList.toggle("sat", style === "sat");
-    $("#layerIc").innerHTML = ic(style === "sat" ? "map" : "globe"); // shows what you switch TO
-    $("#layerTxt").textContent = style === "sat" ? "Map" : "Satellite";
+    if (style === "map") style = "streets"; // old saved value
+    const st = styleById(style);
+    mapApi.setStyle(st.id);
+    state.mapStyle = st.id; save();
+    $("#view-map").classList.toggle("sat", st.id === "sat");
+    $("#layerIc").innerHTML = ic(st.id === "sat" ? "globe" : "map");
+    $("#layerTxt").textContent = st.name;
+    renderStyleMenu();
+  }
+  function renderStyleMenu() {
+    const menu = $("#styleMenu"); if (!menu) return;
+    const list = mapApi && mapApi.kind === "google" ? MAP_STYLES.filter((x) => x.id === "streets" || x.id === "sat") : MAP_STYLES;
+    menu.innerHTML = `<div class="sm-title">Map style</div>` + list.map((x) => `
+      <button class="sm-item ${state.mapStyle === x.id ? "on" : ""}" data-style="${x.id}">
+        <span class="sm-sw">${x.sw.map((c) => `<i style="background:${c}"></i>`).join("")}</span>
+        <span class="sm-txt"><b>${x.name}</b><small>${x.hint}</small></span>
+        ${state.mapStyle === x.id ? ic("check") : ""}
+      </button>`).join("");
+  }
+  function toggleStyleMenu(open) {
+    const menu = $("#styleMenu");
+    const willOpen = open ?? menu.hidden;
+    menu.hidden = !willOpen;
+    if (willOpen) renderStyleMenu();
   }
 
   // ---------- Google Maps implementation ----------
@@ -486,7 +523,7 @@
     const g = new Map(el, {
       center: { lat: CONFIG.center[0], lng: CONFIG.center[1] }, zoom: CONFIG.zoom,
       mapId: CONFIG.googleMapId || "DEMO_MAP_ID",
-      mapTypeId: state.mapStyle === "map" ? "roadmap" : "hybrid",
+      mapTypeId: state.mapStyle === "sat" ? "hybrid" : "roadmap",
       disableDefaultUI: true, gestureHandling: "greedy", clickableIcons: false, tilt: 0,
     });
     // key rejected after the map was created (e.g. billing off) → swap to the backup map
@@ -513,7 +550,7 @@
       flyTo(lat, lng, zoom) { g.panTo({ lat, lng }); if (zoom != null) g.setZoom(zoom); },
       panTo(lat, lng) { g.panTo({ lat, lng }); },
       onMapClick(fn) { g.addListener("click", fn); },
-      setStyle(style) { g.setMapTypeId(style === "map" ? "roadmap" : "hybrid"); },
+      setStyle(style) { g.setMapTypeId(style === "sat" ? "hybrid" : "roadmap"); },
       resize() {},
     };
   }
@@ -523,23 +560,31 @@
     const m = L.map(el, { zoomControl: false }).setView(CONFIG.center, CONFIG.zoom);
     const mk = {}; let me = null, acc = null, layers = [], maptilerFailed = false;
     const icon = (html) => L.divIcon({ className: "", iconSize: [44, 46], iconAnchor: [22, 44], html });
+    const mtLayer = (st) => L.tileLayer(`https://api.maptiler.com/maps/${st.mt}/{z}/{x}/{y}{r}.${st.ext || "png"}?key=${CONFIG.maptilerKey}`, {
+      tileSize: 512, zoomOffset: -1, minZoom: 1, maxZoom: 20, crossOrigin: true,
+      attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    });
     const BASE = {
-      sat: () => CONFIG.maptilerKey && !maptilerFailed
-        ? [L.tileLayer(`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}{r}.jpg?key=${CONFIG.maptilerKey}`, { maxZoom: 20, attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; OSM contributors' })]
-        : [
-            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, className: "sat-imagery", attribution: "Imagery &copy; Esri, Maxar &middot; Labels &copy; CARTO, OSM" }),
-            L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", className: "sat-labels" }),
-          ],
-      map: () => [L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19, subdomains: "abcd", attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>' })],
+      esri: () => [
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, className: "sat-imagery", attribution: "Imagery &copy; Esri, Maxar &middot; Labels &copy; CARTO, OSM" }),
+        L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}{r}.png", { maxZoom: 20, subdomains: "abcd", className: "sat-labels" }),
+      ],
+      carto: () => [L.tileLayer("https://{s}.basemap.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19, subdomains: "abcd", attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>' })],
       osm: () => [L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' })],
+    };
+    const layersFor = (style) => {
+      if (BASE[style]) return BASE[style]();
+      if (CONFIG.maptilerKey && !maptilerFailed) return [mtLayer(styleById(style))];
+      return style === "sat" ? BASE.esri() : BASE.carto();
     };
     function setBase(style) {
       layers.forEach((l) => m.removeLayer(l));
-      layers = BASE[style]();
+      layers = layersFor(style);
       let errors = 0;
       layers[0].on("tileerror", () => {
-        if (++errors === 6 && style === "sat" && CONFIG.maptilerKey && !maptilerFailed) { maptilerFailed = true; setBase("sat"); return; }
-        if (errors === 6 && style !== "osm") { toast("Map tiles failed to load – switching provider"); setBase(style === "sat" ? "map" : "osm"); }
+        if (++errors !== 6) return;
+        if (CONFIG.maptilerKey && !maptilerFailed && !BASE[style]) { maptilerFailed = true; console.warn("MapTiler failed – using free fallback"); setBase(style); return; }
+        if (style !== "osm") { toast("Map tiles failed to load – switching provider"); setBase(style === "sat" && !BASE[style] ? "carto" : "osm"); }
       });
       layers.forEach((l) => l.addTo(m));
       layers[0].bringToBack();
