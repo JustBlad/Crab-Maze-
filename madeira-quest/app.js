@@ -645,7 +645,7 @@
     $("#sheet").innerHTML = `
       <button class="sheet-close" aria-label="Close">${ic("x")}</button>
       <div class="sheet-card">
-        <div class="sheet-thumb ph">${visit && visit.photo ? `<img src="${visit.photo}" alt="">` : placeArt(p, 0)}</div>
+        <div class="sheet-thumb ph">${thumbHTML(p)}</div>
         <div class="sheet-body">
           <span class="tag ${visit ? "green" : !unlocked ? "grey" : ""}" style="align-self:flex-start">${visit ? ic("check", "ic-sm") + " Visited" : !unlocked ? ic("lock", "ic-sm") + " Level " + p.level : ic(c.icon, "ic-sm") + " " + c.label}</span>
           <div class="sheet-title">${esc(p.name)}</div>
@@ -667,6 +667,27 @@
   }
 
   // ---------- Place page ----------
+  // Real pictures for the header: official photos from data.js (img/ folder),
+  // then photos the group uploaded, then my own photo. Illustrations fill the rest.
+  function placePhotos(p) {
+    const list = (p.photos || []).map((src) => ({ src, credit: p.photoCredit || "" }));
+    (photoCache[p.id] || []).forEach((x) => { const img = safeImg(x.photo); if (img) list.push({ src: img, credit: `Photo: ${x.name}` }); });
+    const v = state.visits[p.id];
+    if (v && v.photo) list.push({ src: v.photo, credit: "Your photo" });
+    return list;
+  }
+  function thumbHTML(p) {
+    const v = state.visits[p.id];
+    const src = (p.photos && p.photos[0]) || (v && v.photo);
+    return src ? `<img src="${esc(src)}" alt="" loading="lazy">` : placeArt(p, 0);
+  }
+  function heroHTML(p) {
+    const photos = placePhotos(p);
+    return [0, 1, 2].map((i) => photos[i]
+      ? `<div class="ph"><img src="${esc(photos[i].src)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">${photos[i].credit ? `<span class="ph-credit">${esc(photos[i].credit)}</span>` : ""}</div>`
+      : `<div class="ph">${placeArt(p, i)}</div>`).join("");
+  }
+
   function galleryItems(p) {
     const visit = state.visits[p.id], items = [];
     if (visit && visit.photo) items.push({ name: state.user.name, color: state.user.color, cap: visit.caption || "You", img: visit.photo });
@@ -725,7 +746,7 @@
         <button class="icon-btn fav-btn ${fav ? "on" : ""}" id="favBtn" aria-label="Save">${ic("star", fav ? "ic-fill" : "")}</button>
       </div>
       ${!unlocked ? `<div class="locked-banner"><span class="lb-ic">${ic("lock")}</span><div><b>Level ${p.level} – still locked</b>${plural(missing, "more place", "more places")} from Level 1 and it's yours.</div></div>` : ""}
-      <div class="gallery-hero">${[0, 1, 2].map((i) => `<div class="ph">${placeArt(p, i)}</div>`).join("")}</div>
+      <div class="gallery-hero" id="heroWrap">${heroHTML(p)}</div>
       <div class="place-body">
         <div class="place-head">
           <div>
@@ -777,6 +798,7 @@
       fetchPhotos(id).then(() => {
         if (location.hash !== `#/place/${id}`) return;
         $("#galleryWrap").innerHTML = galleryHTML(p);
+        $("#heroWrap").innerHTML = heroHTML(p);
         $("#photoCount").textContent = plural(galleryItems(p).length, "photo", "photos");
       }).catch((e) => console.warn("photos", e));
     }
@@ -866,7 +888,7 @@
         <div class="place-list">${list.map((p) => {
           const { avg, count } = avgRating(p.id), c = CATEGORIES[p.cat], n = visitorsOf(p.id).length, vis = state.visits[p.id];
           return `<a class="place-row" href="#/place/${p.id}">
-            <div class="pr-thumb ph">${vis && vis.photo ? `<img src="${vis.photo}" alt="">` : placeArt(p, 0)}</div>
+            <div class="pr-thumb ph">${thumbHTML(p)}</div>
             <div class="pr-body"><b>${esc(p.name)}</b>
               <small>${c.label} · ${count ? `★ ${avg.toFixed(1)}` : "new"} · ${n ? `${n} visited` : "nobody yet"}${userPos ? ` · ${fmtDist(distTo(p))}` : ""}</small></div>
             <div class="pr-state ${vis ? "done" : ""}">${vis ? ic("check") : "+" + CONFIG.points.visit}</div>
@@ -952,7 +974,7 @@
         <div class="section-title">My photos <small>${photos.length}</small></div>
         ${photos.length ? `<div class="my-photos">${photos.map((p) => `<a class="ph" href="#/place/${p.id}"><img src="${state.visits[p.id].photo}" alt="${esc(p.name)}"></a>`).join("")}</div>` : `<div class="empty">No photos yet. Pick a place on the map!</div>`}
 
-        ${state.favorites.length ? `<div class="section-title">Saved <small>${state.favorites.length}</small></div><div class="place-list">${state.favorites.map(byId).filter(Boolean).map((p) => `<a class="place-row" href="#/place/${p.id}"><div class="pr-thumb ph">${placeArt(p, 0)}</div><div class="pr-body"><b>${esc(p.name)}</b><small>${CATEGORIES[p.cat].label}</small></div><div class="pr-state ${isVisited(p.id) ? "done" : ""}">${ic(isVisited(p.id) ? "check" : "arrow")}</div></a>`).join("")}</div>` : ""}
+        ${state.favorites.length ? `<div class="section-title">Saved <small>${state.favorites.length}</small></div><div class="place-list">${state.favorites.map(byId).filter(Boolean).map((p) => `<a class="place-row" href="#/place/${p.id}"><div class="pr-thumb ph">${thumbHTML(p)}</div><div class="pr-body"><b>${esc(p.name)}</b><small>${CATEGORIES[p.cat].label}</small></div><div class="pr-state ${isVisited(p.id) ? "done" : ""}">${ic(isVisited(p.id) ? "check" : "arrow")}</div></a>`).join("")}</div>` : ""}
 
         <div class="section-title">Settings</div>
         <div class="settings">

@@ -33,6 +33,12 @@ const CATEGORIES = {
   sweet: { label: "Ice cream", icon: "icecream", color: "#E5746A" },  // coral
 };
 
+/* Photos for the place header (up to 3): put image files into the img/ folder
+   and list them per place, e.g.
+     photos: ["img/caco-1.jpg", "img/caco-2.jpg"], photoCredit: "Photo: Lena",
+   Only use photos you took yourself or are allowed to use (e.g. CC-licensed
+   from Wikimedia Commons – then put the author in photoCredit).
+   Without photos, the illustrations are shown. */
 const PLACES = [
   // ---------------- LEVEL 1 ----------------
   {
