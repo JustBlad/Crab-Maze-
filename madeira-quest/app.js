@@ -99,7 +99,7 @@
   const avatarHTML = (name, color, cls = "") => `<span class="avatar ${cls}" style="background:${safeColor(color)}">${esc(initials(name))}</span>`;
   const avatarsHTML = (list, n) => `<span class="avatars">${list.slice(-n).map((v) => avatarHTML(v.name, v.color)).join("")}</span>`;
   const dayKey = (ts) => { const d = new Date(ts); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
-  const routeURL = (p) => `https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=${encodeURIComponent(p.name + ", Funchal, Madeira")}`;
+  const routeURL = (p) => `https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=${p.lat},${p.lng}`;
 
   function streak() {
     const days = new Set(Object.values(state.visits).map((v) => dayKey(v.ts)));
@@ -402,7 +402,12 @@
     const km = haversine(userPos, { lat: CONFIG.center[0], lng: CONFIG.center[1] }) / 1000;
     if (km > 15) toast(`You're ${km < 100 ? km.toFixed(0) : Math.round(km).toLocaleString("en")} km from Funchal – tap “Funchal” to jump back`);
   }
-  function goFunchal() { mapApi && mapApi.flyTo(CONFIG.center[0], CONFIG.center[1], CONFIG.zoom); }
+  // show all places at once (they spread from Praia Formosa to the university)
+  function placesBounds() {
+    const lats = PLACES.map((p) => p.lat), lngs = PLACES.map((p) => p.lng);
+    return { south: Math.min(...lats), north: Math.max(...lats), west: Math.min(...lngs), east: Math.max(...lngs) };
+  }
+  function goFunchal() { mapApi && mapApi.fitBounds(placesBounds()); }
   function refreshDistances() {
     if (selectedId) renderSheet(selectedId, true);
     const h = location.hash;
@@ -474,6 +479,7 @@
     setMapStyle(state.mapStyle || "streets");
     applyFilter();
     updateMe();
+    if (!userPos) setTimeout(goFunchal, 50); // start with all places in view
   }
   function setMapStyle(style) {
     if (!mapApi) return;
@@ -549,6 +555,7 @@
       },
       flyTo(lat, lng, zoom) { g.panTo({ lat, lng }); if (zoom != null) g.setZoom(zoom); },
       panTo(lat, lng) { g.panTo({ lat, lng }); },
+      fitBounds(b) { g.fitBounds(b, { top: 120, bottom: 24, left: 20, right: 64 }); },
       onMapClick(fn) { g.addListener("click", fn); },
       setStyle(style) { g.setMapTypeId(style === "sat" ? "hybrid" : "roadmap"); },
       resize() {},
@@ -557,7 +564,7 @@
 
   // ---------- Leaflet fallback implementation ----------
   function leafletMap(el) {
-    const m = L.map(el, { zoomControl: false }).setView(CONFIG.center, CONFIG.zoom);
+    const m = L.map(el, { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5, wheelPxPerZoomLevel: 90 }).setView(CONFIG.center, CONFIG.zoom);
     const mk = {}; let me = null, acc = null, layers = [], maptilerFailed = false;
     const icon = (html) => L.divIcon({ className: "", iconSize: [44, 46], iconAnchor: [22, 44], html });
     const mtLayer = (st) => L.tileLayer(`https://api.maptiler.com/maps/${st.mt}/{z}/{x}/{y}{r}.${st.ext || "png"}?key=${CONFIG.maptilerKey}`, {
@@ -604,6 +611,7 @@
       },
       flyTo(lat, lng, zoom) { m.flyTo([lat, lng], zoom ?? m.getZoom(), { duration: 0.9 }); },
       panTo(lat, lng) { m.panTo([lat, lng], { animate: true }); },
+      fitBounds(b) { m.flyToBounds([[b.south, b.west], [b.north, b.east]], { paddingTopLeft: [20, 120], paddingBottomRight: [64, 24], duration: 0.9 }); },
       onMapClick(fn) { m.on("click", fn); },
       setStyle(style) { setBase(style); },
       resize() { m.invalidateSize(); },
